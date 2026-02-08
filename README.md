@@ -8,7 +8,7 @@
 
 ⚙️ **How to Access the Attendance Calculator**
 
-* 📥 Download the file to your **PC**
+* 📥 Download the (Calculator) file to your **PC**
 * 🌐 Open the file using **Google Chrome**
 * 📘 Follow the user guide below
 
