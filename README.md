@@ -30,4 +30,4 @@
 * 📊 **Planning Tip:** Use the **weekly plan table** to predict and manage your future attendance path
 
 ---
-
+Thanks 🙏
