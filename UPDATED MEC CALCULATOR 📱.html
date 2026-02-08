@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEC Attendance Calculator (Not Official)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7dd3c0 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated gradient overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(30, 60, 114, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(125, 211, 192, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(139, 103, 79, 0.3) 0%, transparent 50%);
+      animation: gradientShift 15s ease infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Floating particles */
+    .particle {
+      position: fixed;
+      width: 3px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float 20s infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    header {
+      font-size: 36px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff, #f0f8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 30px;
+      text-align: center;
+      letter-spacing: 0.5px;
+      animation: fadeInDown 0.6s ease;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .lang-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(30, 60, 114, 0.4);
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .lang-toggle:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 12px 32px rgba(30, 60, 114, 0.6);
+    }
+
+    .lang-toggle:active {
+      transform: translateY(-1px);
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 32px;
+      padding: 40px;
+      box-shadow: 
+        0 20px 60px rgba(30, 60, 114, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+      text-align: center;
+      animation: fadeInUp 0.6s ease;
+      backdrop-filter: blur(20px);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.1), rgba(42, 82, 152, 0.1));
+      border-left: 4px solid #1e3c72;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+
+    .info-box p {
+      color: #4a5568;
+      font-size: 14px;
+      line-height: 1.8;
+      margin: 5px 0;
+    }
+
+    .info-box b {
+      color: #1e3c72;
+      font-weight: 600;
+    }
+
+    .input-group {
+      margin: 24px 0;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      padding-left: 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 16px 18px;
+      font-size: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f7fafc, #edf2f7);
+      color: #2d3748;
+      outline: none;
+      transition: all 0.3s ease;
+      font-family: "Poppins", sans-serif;
+      font-weight: 500;
+    }
+
+    input:focus {
+      border-color: #1e3c72;
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(30, 60, 114, 0.1), 0 4px 12px rgba(30, 60, 114, 0.15);
+      transform: translateY(-2px);
+    }
+
+    input::placeholder {
+      color: #a0aec0;
+      font-weight: 400;
+    }
+
+    button.calculate {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      border: none;
+      border-radius: 16px;
+      color: white;
+      padding: 16px 32px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(30, 60, 114, 0.35);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button.calculate::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    button.calculate:hover::before {
+      left: 100%;
+    }
+
+    button.calculate:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(30, 60, 114, 0.5);
+    }
+
+    button.calculate:active {
+      transform: translateY(-1px);
+    }
+
+    .result {
+      margin-top: 28px;
+      font-size: 15px;
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.08), rgba(125, 211, 192, 0.08));
+      border: 2px solid rgba(30, 60, 114, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      color: #2d3748;
+      line-height: 2;
+      text-align: left;
+      animation: slideIn 0.5s ease;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result b {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 600;
+      margin-top: 12px;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .status-excellent {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      color: white;
+    }
+
+    .status-warning {
+      background: linear-gradient(135deg, #8b674f, #6b4f35);
+      color: white;
+    }
+
+    .status-danger {
+      background: linear-gradient(135deg, #2a5298, #1e3c72);
+      color: white;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 12px;
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+      border-radius: 50px;
+      margin: 18px 0;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) inset;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #1e3c72, #2a5298, #7dd3c0);
+      border-radius: 50px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 20px rgba(30, 60, 114, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    .stat-item {
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.08), rgba(125, 211, 192, 0.08));
+      border: 1px solid rgba(30, 60, 114, 0.15);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(30, 60, 114, 0.2);
+      border-color: rgba(30, 60, 114, 0.3);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #718096;
+      margin-bottom: 6px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    footer {
+      position: relative;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.95);
+      text-align: center;
+      max-width: 100%;
+      z-index: 1;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      line-height: 1.6;
+      padding: 12px 20px;
+      background: rgba(30, 60, 114, 0.3);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    footer b {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    footer a {
+      color: #7dd3c0;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    footer a:hover {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+
+    .reset-btn {
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.1), rgba(42, 82, 152, 0.1));
+      border: 2px solid rgba(30, 60, 114, 0.3);
+      border-radius: 14px;
+      color: #1e3c72;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .reset-btn:hover {
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.2), rgba(42, 82, 152, 0.2));
+      border-color: rgba(30, 60, 114, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 60, 114, 0.2);
+    }
+
+    /* Alert message styles */
+    .alert {
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin: 12px 0;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, rgba(72, 187, 120, 0.15), rgba(56, 161, 105, 0.15));
+      border-left: 4px solid #48bb78;
+      color: #276749;
+    }
+
+    .alert-warning {
+      background: linear-gradient(135deg, rgba(139, 103, 79, 0.15), rgba(107, 79, 53, 0.15));
+      border-left: 4px solid #8b674f;
+      color: #5a4a37;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.15), rgba(42, 82, 152, 0.15));
+      border-left: 4px solid #1e3c72;
+      color: #1a2f5a;
+    }
+
+    .alert-info {
+      background: linear-gradient(135deg, rgba(125, 211, 192, 0.15), rgba(77, 171, 154, 0.15));
+      border-left: 4px solid #7dd3c0;
+      color: #2d5a4f;
+    }
+
+    /* Weekly Plan Table */
+    .plan-section {
+      margin-top: 24px;
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(125, 211, 192, 0.15), rgba(77, 171, 154, 0.15));
+      border: 3px solid rgba(125, 211, 192, 0.4);
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(125, 211, 192, 0.2);
+    }
+
+    .plan-title {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 18px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .plan-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 16px;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      border: 2px solid rgba(30, 60, 114, 0.2);
+    }
+
+    .plan-table thead {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+    }
+
+    .plan-table th {
+      padding: 16px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      border-bottom: 3px solid #2a5298;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .plan-table td {
+      padding: 16px 12px;
+      text-align: center;
+      border-bottom: 2px solid #e2e8f0;
+      font-size: 15px;
+      color: #2d3748;
+      font-weight: 600;
+      background: white;
+    }
+
+    .plan-table tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    .plan-table tbody tr:hover {
+      background: rgba(30, 60, 114, 0.08);
+      transform: scale(1.01);
+      box-shadow: 0 4px 12px rgba(30, 60, 114, 0.15);
+    }
+
+    .plan-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .highlight-row {
+      background: linear-gradient(135deg, rgba(72, 187, 120, 0.15), rgba(56, 161, 105, 0.15)) !important;
+      font-weight: 700;
+    }
+
+    .highlight-row td {
+      background: transparent;
+      color: #276749;
+      font-size: 16px;
+    }
+
+    /* Alternating row colors for better readability */
+    .plan-table tbody tr:nth-child(even) {
+      background: rgba(125, 211, 192, 0.05);
+    }
+
+    .plan-table tbody tr:nth-child(even) td {
+      background: transparent;
+    }
+
+    .recommendation-box {
+      margin-top: 18px;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, rgba(72, 187, 120, 0.15), rgba(56, 161, 105, 0.15));
+      border-left: 5px solid #48bb78;
+      border-radius: 14px;
+      font-size: 15px;
+      color: #276749;
+      font-weight: 600;
+      line-height: 1.8;
+      box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
+    }
+
+    .recommendation-box b {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 480px) {
+      header { 
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+      .card { 
+        padding: 28px 24px;
+        border-radius: 24px;
+      }
+      .lang-toggle {
+        top: 15px;
+        right: 15px;
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+      input, button.calculate { 
+        font-size: 15px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      footer {
+        font-size: 11px;
+        padding: 10px 15px;
+        margin-top: 30px;
+      }
+      .stat-value {
+        font-size: 22px;
+      }
+      .plan-table th,
+      .plan-table td {
+        padding: 12px 8px;
+        font-size: 13px;
+      }
+      .plan-title {
+        font-size: 18px;
+      }
+      .recommendation-box {
+        font-size: 14px;
+        padding: 14px 16px;
+      }
+      .plan-section {
+        padding: 18px;
+      }
+    }
+
+    /* Add glass morphism effect */
+    @supports (backdrop-filter: blur(10px)) {
+      .card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+      }
+    }
+
+    /* Smooth scroll behavior */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* RTL (Right-to-Left) styling for Arabic */
+    .rtl-content {
+      direction: rtl;
+      text-align: right;
+    }
+
+    .rtl-content .info-box {
+      border-left: none;
+      border-right: 4px solid #1e3c72;
+    }
+
+    .rtl-content .alert {
+      border-left: none;
+    }
+
+    .rtl-content .alert-success {
+      border-right: 4px solid #48bb78;
+    }
+
+    .rtl-content .alert-warning {
+      border-right: 4px solid #8b674f;
+    }
+
+    .rtl-content .alert-danger {
+      border-right: 4px solid #1e3c72;
+    }
+
+    .rtl-content .alert-info {
+      border-right: 4px solid #7dd3c0;
+    }
+
+    .rtl-content .recommendation-box {
+      border-left: none;
+      border-right: 5px solid #48bb78;
+    }
+
+    .rtl-content .plan-section {
+      border-left: none;
+      border-right: 3px solid rgba(125, 211, 192, 0.4);
+    }
+
+    .rtl-content input,
+    .rtl-content label {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated particles -->
+  <script>
+    for (let i = 0; i < 15; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = Math.random() * 20 + 's';
+      particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+      document.body.appendChild(particle);
+    }
+  </script>
+
+  <button class="lang-toggle" onclick="toggleLanguage()">عربي</button>
+
+  <div class="container">
+    <header id="title">📘 MEC Attendance Calculator</header>
+
+    <!-- English Section -->
+    <div class="card" id="english">
+      <div class="info-box">
+        <p><b>📌 Important:</b> Each week = 4 hours | Week 1 not counted</p>
+        <p>This calculator is for <b>one module at a time</b> with <b>4 hours weekly</b>.</p>
+        <p>💡 If you haven't attended this week's class yet, enter the previous week number instead.</p>
+      </div>
+
+      <div class="input-group">
+        <label for="week_en">📅 Current Week (2–14)</label>
+        <input type="number" id="week_en" min="2" max="14" placeholder="Enter week number (e.g., 6)">
+      </div>
+
+      <div class="input-group">
+        <label for="absent_en">⏱️ Total Absent Hours</label>
+        <input type="number" id="absent_en" step="0.5" min="0" placeholder="Enter hours absent (e.g., 3)">
+      </div>
+
+      <button class="calculate" onclick="calculateAttendance('en')">📊 Calculate Attendance</button>
+      <button class="reset-btn" onclick="resetForm('en')">🔄 Reset</button>
+
+      <div class="result" id="result_en"></div>
+    </div>
+
+    <!-- Arabic Section -->
+    <div class="card rtl-content" id="arabic" style="display:none;">
+      <div class="info-box">
+        <p><b>📌 مهم:</b> كل أسبوع = ٤ ساعات | الأسبوع الأول غير محسوب</p>
+        <p>هذه الآلة الحاسبة خاصة <b>بمقرر واحد فقط</b> بشرط <b>٤ ساعات أسبوعياً</b>.</p>
+        <p>💡 إذا لم تحضر حصة هذا الأسبوع بعد، أدخل رقم الأسبوع السابق بدلاً من ذلك.</p>
+      </div>
+
+      <div class="input-group">
+        <label for="week_ar">📅 الأسبوع الحالي (٢–١٤)</label>
+        <input type="number" id="week_ar" min="2" max="14" placeholder="أدخل رقم الأسبوع (مثلاً: ٦)">
+      </div>
+
+      <div class="input-group">
+        <label for="absent_ar">⏱️ إجمالي ساعات الغياب</label>
+        <input type="number" id="absent_ar" step="0.5" min="0" placeholder="أدخل ساعات الغياب (مثلاً: ٣)">
+      </div>
+
+      <button class="calculate" onclick="calculateAttendance('ar')">📊 احسب الحضور</button>
+      <button class="reset-btn" onclick="resetForm('ar')">🔄 إعادة تعيين</button>
+
+      <div class="result" id="result_ar"></div>
+    </div>
+  </div>
+
+  <footer>
+    <b>Developed by:</b> Hamza Suleiman Al Adawi<br>
+    <b>MEC ID:</b> 23F24607 | <b>Email:</b> <a href="mailto:hamzasuleiman164@gmail.com">hamzasuleiman164@gmail.com</a><br>
+    <small>© 2026 | Not an official MEC tool</small>
+  </footer>
+
+  <script>
+    let currentLang = "en";
+
+    function toggleLanguage() {
+      const english = document.getElementById("english");
+      const arabic = document.getElementById("arabic");
+      const title = document.getElementById("title");
+      const toggle = document.querySelector(".lang-toggle");
+
+      if (currentLang === "en") {
+        english.style.display = "none";
+        arabic.style.display = "block";
+        title.textContent = "📘 حاسبة حضور MEC";
+        toggle.textContent = "English";
+        currentLang = "ar";
+      } else {
+        english.style.display = "block";
+        arabic.style.display = "none";
+        title.textContent = "📘 MEC Attendance Calculator";
+        toggle.textContent = "عربي";
+        currentLang = "en";
+      }
+    }
+
+    function resetForm(lang) {
+      if (lang === "en") {
+        document.getElementById("week_en").value = "";
+        document.getElementById("absent_en").value = "";
+        document.getElementById("result_en").classList.remove("show");
+      } else {
+        document.getElementById("week_ar").value = "";
+        document.getElementById("absent_ar").value = "";
+        document.getElementById("result_ar").classList.remove("show");
+      }
+    }
+
+    function calculateAttendance(lang) {
+      let week, absent, resultDiv;
+
+      if (lang === "en") {
+        week = parseInt(document.getElementById("week_en").value);
+        absent = parseFloat(document.getElementById("absent_en").value);
+        resultDiv = document.getElementById("result_en");
+      } else {
+        week = parseInt(document.getElementById("week_ar").value);
+        absent = parseFloat(document.getElementById("absent_ar").value);
+        resultDiv = document.getElementById("result_ar");
+      }
+
+      // Validation
+      if (isNaN(week) || isNaN(absent) || week < 2 || week > 14 || absent < 0) {
+        resultDiv.innerHTML = lang === "en"
+          ? '<div class="alert alert-warning">⚠️ Please enter valid numbers. Week must be between 2-14.</div>'
+          : '<div class="alert alert-warning">⚠️ الرجاء إدخال أرقام صحيحة. يجب أن يكون الأسبوع بين ٢-١٤.</div>';
+        resultDiv.classList.add("show");
+        return;
+      }
+
+      const weeksCounted = week - 1;
+      const totalHours = weeksCounted * 4;
+      
+      // Prevent impossible scenarios
+      if (absent > totalHours) {
+        resultDiv.innerHTML = lang === "en"
+          ? '<div class="alert alert-danger">⚠️ Absent hours cannot exceed total hours conducted.</div>'
+          : '<div class="alert alert-danger">⚠️ لا يمكن أن تتجاوز ساعات الغياب إجمالي الساعات.</div>';
+        resultDiv.classList.add("show");
+        return;
+      }
+
+      const attendedHours = totalHours - absent;
+      const attendancePercent = (attendedHours / totalHours) * 100;
+      const remainingWeeks = 14 - week;
+      const remainingHours = remainingWeeks * 4;
+
+      // Calculate how many more hours can be missed
+      const maxAllowedAbsent = totalHours * 0.25; // 25% can be absent for 75% attendance
+      const canStillMiss = Math.max(0, maxAllowedAbsent - absent);
+
+      // Generate weekly attendance plan
+      let weeklyPlan = generateWeeklyPlan(week, absent, totalHours, attendancePercent, remainingWeeks, lang);
+
+      if (lang === "en") {
+        let statusBadge = "";
+        let statusClass = "";
+        let alertMessage = "";
+        let alertClass = "";
+
+        if (attendancePercent >= 75) {
+          statusBadge = "✅ Excellent";
+          statusClass = "status-excellent";
+          alertMessage = "🎉 You meet the 75% attendance requirement!";
+          alertClass = "alert-success";
+        } else if (attendancePercent >= 55) {
+          statusBadge = "⚠️ Minimum Met";
+          statusClass = "status-warning";
+          alertMessage = "✓ You meet the 55% minimum (for modules without ESE exams).";
+          alertClass = "alert-warning";
+        } else {
+          statusBadge = "❌ Below Requirement";
+          statusClass = "status-danger";
+          alertMessage = "⚠️ Your attendance is below the required threshold. Attend all remaining classes.";
+          alertClass = "alert-danger";
+        }
+
+        let tipMessage = "";
+        if (canStillMiss > 0 && attendancePercent >= 75) {
+          tipMessage = `<div class="alert alert-info">💡 <b>Tip:</b> You can still miss up to <b>${canStillMiss.toFixed(1)}</b> more hours and maintain 75%</div>`;
+        }
+
+        resultDiv.innerHTML = `
+          <b>📊 Week ${week} Summary</b>
+          <div class="progress-bar-container">
+            <div class="progress-bar" style="width: ${Math.min(attendancePercent, 100)}%"></div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">Total Hours</div>
+              <div class="stat-value">${totalHours}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Attended</div>
+              <div class="stat-value">${attendedHours}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Absent</div>
+              <div class="stat-value">${absent}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Attendance %</div>
+              <div class="stat-value">${attendancePercent.toFixed(1)}%</div>
+            </div>
+          </div>
+          <span class="status-badge ${statusClass}">${statusBadge}</span>
+          <div class="alert ${alertClass}" style="margin-top: 15px;">${alertMessage}</div>
+          ${tipMessage}
+          ${weeklyPlan}
+        `;
+      } else {
+        let statusBadge = "";
+        let statusClass = "";
+        let alertMessage = "";
+        let alertClass = "";
+
+        if (attendancePercent >= 75) {
+          statusBadge = "✅ ممتاز";
+          statusClass = "status-excellent";
+          alertMessage = "🎉 أنت فوق الحد المطلوب (٧٥٪)!";
+          alertClass = "alert-success";
+        } else if (attendancePercent >= 55) {
+          statusBadge = "⚠️ الحد الأدنى";
+          statusClass = "status-warning";
+          alertMessage = "✓ وصلت إلى الحد الأدنى للمواد بدون اختبارات نهائية (٥٥٪).";
+          alertClass = "alert-warning";
+        } else {
+          statusBadge = "❌ أقل من المطلوب";
+          statusClass = "status-danger";
+          alertMessage = "⚠️ حضورك أقل من الحد المطلوب. احضر جميع الحصص المتبقية.";
+          alertClass = "alert-danger";
+        }
+
+        let tipMessage = "";
+        if (canStillMiss > 0 && attendancePercent >= 75) {
+          tipMessage = `<div class="alert alert-info">💡 <b>نصيحة:</b> يمكنك الغياب حتى <b>${canStillMiss.toFixed(1)}</b> ساعة إضافية والحفاظ على ٧٥٪</div>`;
+        }
+
+        resultDiv.innerHTML = `
+          <b>📊 ملخص الأسبوع ${week}</b>
+          <div class="progress-bar-container">
+            <div class="progress-bar" style="width: ${Math.min(attendancePercent, 100)}%"></div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">مجموع الساعات</div>
+              <div class="stat-value">${totalHours}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">الحضور</div>
+              <div class="stat-value">${attendedHours}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">الغياب</div>
+              <div class="stat-value">${absent}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">نسبة الحضور</div>
+              <div class="stat-value">${attendancePercent.toFixed(1)}%</div>
+            </div>
+          </div>
+          <span class="status-badge ${statusClass}">${statusBadge}</span>
+          <div class="alert ${alertClass}" style="margin-top: 15px;">${alertMessage}</div>
+          ${tipMessage}
+          ${weeklyPlan}
+        `;
+      }
+
+      resultDiv.classList.add("show");
+    }
+
+    function generateWeeklyPlan(currentWeek, currentAbsent, totalHours, currentPercent, remainingWeeks, lang) {
+      if (remainingWeeks <= 0) {
+        return lang === "en" 
+          ? '<div class="alert alert-info">📅 You are in the final week. No future planning needed.</div>'
+          : '<div class="alert alert-info">📅 أنت في الأسبوع الأخير. لا حاجة للتخطيط المستقبلي.</div>';
+      }
+
+      let planHTML = lang === "en" 
+        ? '<div class="plan-section"><div class="plan-title">📅 Weekly Attendance Plan</div>'
+        : '<div class="plan-section"><div class="plan-title">📅 خطة الحضور الأسبوعية</div>';
+
+      planHTML += '<table class="plan-table"><thead><tr>';
+      planHTML += lang === "en"
+        ? '<th>Week</th><th>Attend (hrs)</th><th>Total Hours</th><th>Attendance %</th>'
+        : '<th>الأسبوع</th><th>احضر (ساعات)</th><th>مجموع الساعات</th><th>نسبة الحضور</th>';
+      planHTML += '</tr></thead><tbody>';
+
+      let currentTotalHours = totalHours;
+      let currentAttendedHours = totalHours - currentAbsent;
+      let bestOption = null;
+      let foundGoodOption = false;
+
+      // Generate scenarios for next 4 weeks or remaining weeks (whichever is less)
+      const weeksToShow = Math.min(4, remainingWeeks);
+      
+      for (let i = 1; i <= weeksToShow; i++) {
+        const targetWeek = currentWeek + i;
+        
+        // Try different attendance scenarios: 0, 2, 3, 4 hours
+        const scenarios = [
+          { hours: 4, label: '4/4' },
+          { hours: 3, label: '3/4' },
+          { hours: 2, label: '2/4' },
+          { hours: 0, label: '0/4' }
+        ];
+
+        for (let scenario of scenarios) {
+          const newTotalHours = currentTotalHours + 4;
+          const newAttendedHours = currentAttendedHours + scenario.hours;
+          const newPercent = (newAttendedHours / newTotalHours) * 100;
+
+          // Find first option that gets above 75% or close to it
+          if (!foundGoodOption && newPercent >= 75 && scenario.hours < 4) {
+            bestOption = {
+              week: targetWeek,
+              hours: scenario.hours,
+              label: scenario.label,
+              totalHours: newTotalHours,
+              percent: newPercent
+            };
+            foundGoodOption = true;
+          }
+
+          // If attending all 4 hours
+          if (scenario.hours === 4) {
+            const rowClass = (newPercent >= 75 && !foundGoodOption && currentPercent < 75) ? 'class="highlight-row"' : '';
+            planHTML += `<tr ${rowClass}>`;
+            planHTML += `<td>${targetWeek}</td>`;
+            planHTML += `<td>${scenario.label}</td>`;
+            planHTML += `<td>${newTotalHours}</td>`;
+            planHTML += `<td><b>${newPercent.toFixed(1)}%</b></td>`;
+            planHTML += '</tr>';
+            
+            // Update for next iteration
+            currentTotalHours = newTotalHours;
+            currentAttendedHours = newAttendedHours;
+            break; // Only show full attendance scenario
+          }
+        }
+      }
+
+      planHTML += '</tbody></table>';
+
+      // Add recommendation
+      if (currentPercent < 75) {
+        if (bestOption) {
+          planHTML += lang === "en"
+            ? `<div class="recommendation-box">💡 <b>Recommendation:</b> In week ${bestOption.week}, you can attend just <b>${bestOption.hours} out of 4 hours</b> and still reach <b>${bestOption.percent.toFixed(1)}%</b> attendance (above 75% requirement).</div>`
+            : `<div class="recommendation-box">💡 <b>التوصية:</b> في الأسبوع ${bestOption.week}، يمكنك حضور <b>${bestOption.hours} من 4 ساعات</b> فقط وستصل إلى <b>${bestOption.percent.toFixed(1)}%</b> حضور (فوق ٧٥٪ المطلوبة).</div>`;
+        } else {
+          const finalTotalHours = totalHours + (remainingWeeks * 4);
+          const finalAttendedHours = (totalHours - currentAbsent) + (remainingWeeks * 4);
+          const finalPercent = (finalAttendedHours / finalTotalHours) * 100;
+          
+          if (finalPercent >= 75) {
+            planHTML += lang === "en"
+              ? `<div class="recommendation-box">💡 <b>Recommendation:</b> Attend all remaining classes to reach <b>${finalPercent.toFixed(1)}%</b> attendance.</div>`
+              : `<div class="recommendation-box">💡 <b>التوصية:</b> احضر جميع الحصص المتبقية للوصول إلى <b>${finalPercent.toFixed(1)}%</b> حضور.</div>`;
+          } else {
+            planHTML += lang === "en"
+              ? '<div class="alert alert-warning">⚠️ Even with perfect attendance, reaching 75% may not be possible. Focus on attending all remaining classes.</div>'
+              : '<div class="alert alert-warning">⚠️ حتى مع الحضور الكامل، قد لا يكون الوصول إلى ٧٥٪ ممكناً. ركز على حضور جميع الحصص المتبقية.</div>';
+          }
+        }
+      } else {
+        planHTML += lang === "en"
+          ? '<div class="recommendation-box">✅ <b>Great!</b> You\'re already above 75%. The table above shows how your attendance will improve with continued full attendance.</div>'
+          : '<div class="recommendation-box">✅ <b>رائع!</b> أنت بالفعل فوق ٧٥٪. يوضح الجدول أعلاه كيف سيتحسن حضورك مع استمرار الحضور الكامل.</div>';
+      }
+
+      planHTML += '</div>';
+      return planHTML;
+    }
+
+    // Add keyboard support
+    document.addEventListener('DOMContentLoaded', function() {
+      ['week_en', 'absent_en', 'week_ar', 'absent_ar'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+          input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+              const lang = id.endsWith('_en') ? 'en' : 'ar';
+              calculateAttendance(lang);
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
