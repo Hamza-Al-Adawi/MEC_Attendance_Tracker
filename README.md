@@ -1,3 +1,6 @@
+https://hudooori.great-site.net/?i=1
+new version ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
+
 🌐 **Attendance Calculator – MEC Student Web System**
 
 * A web-based system designed specifically for **Middle East College (MEC)** students
