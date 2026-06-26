@@ -1,5 +1,4 @@
-https://hudooori.great-site.net/?i=1
-new version ⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️⬆️
+https://hudooori.great-site.net/?i=1 ------- New Version
 
 🌐 **Attendance Calculator – MEC Student Web System**
 
